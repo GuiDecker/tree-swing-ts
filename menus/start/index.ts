@@ -9,6 +9,7 @@ import { renderColor } from "../../core/input/text";
 import { COLORS } from "../../core/terminal/colors";
 import { ConfigService } from "../../services/configService";
 import { showConfigManager } from "../configManager";
+import { showSyncBranches } from "../syncBranches";
 import { makeQuestion } from "../../core/input/question";
 
 const currentOption = 1;
@@ -17,8 +18,14 @@ export const showMenuStart = () => {
   initMenu();
 
   const menuOptions = ConfigService.getConfig();
-  const otherOption = {
+
+  const syncOption = {
     id: menuOptions.length + 1,
+    label: "🔄 Sync child branches",
+    value: "sync",
+  };
+  const otherOption = {
+    id: menuOptions.length + 2,
     label: "other",
     value: "other",
     isGoBack: true,
@@ -29,11 +36,17 @@ export const showMenuStart = () => {
       ...option,
       action: handleCreateNewBranch(option.value, option.label),
     })),
+    { ...syncOption, action: handleSync },
     { ...otherOption, action: handleOther },
   ];
 
-  chooseOption(currentOption, [...menuOptions, otherOption]);
+  chooseOption(currentOption, [...menuOptions, syncOption, otherOption]);
   process.stdin.on("data", handleUpdateOptionsMenu(currentOption, options));
+};
+
+const handleSync = () => {
+  process.stdin.removeAllListeners("data");
+  showSyncBranches();
 };
 
 const handleOther = () => {

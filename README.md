@@ -9,6 +9,7 @@
 ## ✨ Features
 
 - 🔀 **Quick branch creation** — Select an origin branch and get a prefixed feature branch in seconds
+- 🔄 **Sync child branches** — Push the latest fixes from a feature branch into its `for-dev`/`for-stag` children without manual merges
 - 📋 **Configurable presets** — Define your own origin branches and prefixes
 - ⌨️ **Interactive TUI** — Navigate with arrow keys, no flags or arguments needed
 - 🛡️ **Safety checks** — Prevents duplicate prefixes and validates branch names
@@ -45,6 +46,20 @@ An interactive menu will appear:
    - Fetch the latest from origin
    - Create a new branch with the configured prefix (e.g., `for-dev/your-current-branch`)
    - Merge the origin branch into it
+
+### Sync child branches
+
+When you fix something directly on a feature branch (the "parent") and want those
+changes on its already-created `for-dev`/`for-stag` children, select **"🔄 Sync child
+branches"** from the main menu while standing on the parent branch. The tool will:
+
+1. Detect every existing child branch (`<prefix>/<parent>`) for your configured prefixes
+2. Let you **sync all** of them or pick a single one
+3. Merge the parent into each child (your child-only work is preserved)
+4. Ask whether to `git push` each updated child
+
+If a merge hits a conflict, syncing **stops** on that branch and leaves you there to
+resolve it manually — the remaining children are left untouched.
 
 ### Config Manager
 
