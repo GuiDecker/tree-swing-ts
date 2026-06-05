@@ -1,8 +1,4 @@
-import {
-  chooseOption,
-  handleUpdateOptionsMenu,
-  initMenu,
-} from "../../core/input/menu";
+import { chooseOption, handleUpdateOptionsMenu, initMenu } from "../../core/input/menu";
 import { $ } from "bun";
 import { showCursor } from "../../core/terminal/cursor";
 import { renderColor } from "../../core/input/text";
@@ -21,7 +17,7 @@ export const showMenuStart = () => {
 
   const syncOption = {
     id: menuOptions.length + 1,
-    label: "🔄 Sync child branches",
+    label: "Sync child branches",
     value: "sync",
   };
   const otherOption = {
@@ -55,21 +51,13 @@ const handleOther = () => {
 };
 
 const handleCreateNewBranch = (prefix: string, branch: string) => async () => {
-  const currentBranch = (
-    await $`git rev-parse --abbrev-ref HEAD`.text()
-  ).trim();
+  const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim();
 
   if (currentBranch.includes(prefix)) {
     process.stdout.write(renderColor(`⚠️  The current branch:`, COLORS.YELLOW));
-    process.stdout.write(
-      renderColor(` ${currentBranch}\n`, [COLORS.BOLD, COLORS.MAGENTA]),
-    );
-    process.stdout.write(
-      renderColor(`Already includes the prefix`, COLORS.YELLOW),
-    );
-    process.stdout.write(
-      renderColor(` ${prefix}\n\n`, [COLORS.BOLD, COLORS.MAGENTA]),
-    );
+    process.stdout.write(renderColor(` ${currentBranch}\n`, [COLORS.BOLD, COLORS.MAGENTA]));
+    process.stdout.write(renderColor(`Already includes the prefix`, COLORS.YELLOW));
+    process.stdout.write(renderColor(` ${prefix}\n\n`, [COLORS.BOLD, COLORS.MAGENTA]));
     process.stdout.write(
       renderColor(
         `❌ Please switch to a branch that doesn't include the prefix "${prefix}" before running this tool.\n`,
@@ -81,9 +69,7 @@ const handleCreateNewBranch = (prefix: string, branch: string) => async () => {
     process.exit(0);
   }
 
-  process.stdout.write(
-    renderColor("⏳ Fetching and preparing...\n", COLORS.CYAN),
-  );
+  process.stdout.write(renderColor("⏳ Fetching and preparing...\n", COLORS.CYAN));
 
   try {
     await $`git switch ${branch}`.quiet();
@@ -102,10 +88,7 @@ const handleCreateNewBranch = (prefix: string, branch: string) => async () => {
     await $`git pull origin ${branch}`.quiet();
   } catch {
     process.stdout.write(
-      renderColor(
-        `⚠️  Failed to update branch "${branch}". Please check if it exists on the remote.\n`,
-        COLORS.RED,
-      ),
+      renderColor(`⚠️  Failed to update branch "${branch}". Please check if it exists on the remote.\n`, COLORS.RED),
     );
     showCursor();
     process.exit(0);
@@ -115,73 +98,42 @@ const handleCreateNewBranch = (prefix: string, branch: string) => async () => {
   process.stdout.write(renderColor(`📌 New branch: \n`, COLORS.GREEN));
   process.stdout.write(renderColor(`   ${newBranch}\n\n`, COLORS.DIM));
 
-  process.stdout.write(
-    renderColor("🗑️  Cleaning up old branch...\n", COLORS.GREEN),
-  );
+  process.stdout.write(renderColor("🗑️  Cleaning up old branch...\n", COLORS.GREEN));
   try {
     await $`git branch -D "${newBranch}"`.quiet();
-    process.stdout.write(
-      renderColor(`✅ Old branch "${newBranch}" deleted.\n\n`, COLORS.DIM),
-    );
+    process.stdout.write(renderColor(`✅ Old branch "${newBranch}" deleted.\n\n`, COLORS.DIM));
   } catch {
-    process.stdout.write(
-      renderColor(`⚠️ No existing branch to delete.\n\n`, COLORS.DIM),
-    );
+    process.stdout.write(renderColor(`⚠️ No existing branch to delete.\n\n`, COLORS.DIM));
   }
 
-  process.stdout.write(
-    renderColor("🔀 Switching to new branch...\n", COLORS.GREEN),
-  );
+  process.stdout.write(renderColor("🔀 Switching to new branch...\n", COLORS.GREEN));
   await $`git switch -c "${newBranch}"`.quiet();
-  process.stdout.write(
-    renderColor(`✅ Switched to new branch "${newBranch}".\n\n`, COLORS.DIM),
-  );
+  process.stdout.write(renderColor(`✅ Switched to new branch "${newBranch}".\n\n`, COLORS.DIM));
 
-  process.stdout.write(
-    renderColor(`🔗 Merging origin/${branch}...\n`, COLORS.GREEN),
-  );
+  process.stdout.write(renderColor(`🔗 Merging origin/${branch}...\n`, COLORS.GREEN));
   try {
     await $`git merge "origin/${currentBranch}"`.quiet();
-    process.stdout.write(
-      renderColor("✅ Success!\n", [COLORS.BOLD, COLORS.GREEN]),
-    );
+    process.stdout.write(renderColor("✅ Success!\n", [COLORS.BOLD, COLORS.GREEN]));
   } catch {
-    process.stdout.write(
-      renderColor(
-        `⚠️  Merge conflicts detected. Please resolve them manually.\n`,
-        COLORS.RED,
-      ),
-    );
+    process.stdout.write(renderColor(`⚠️  Merge conflicts detected. Please resolve them manually.\n`, COLORS.RED));
     showCursor();
     process.exit(0);
   }
 
   process.stdout.write("\n\n");
 
-  makeQuestion("Did you like to open the PR now? (y/n)").then(
-    async (answer) => {
-      if (answer.toLowerCase() === "y") {
-        process.stdout.write(
-          renderColor(
-            `🔗 Opening PR for branch "${newBranch}"...\n`,
-            COLORS.GREEN,
-          ),
-        );
+  makeQuestion("Did you like to open the PR now? (y/n)").then(async (answer) => {
+    if (answer.toLowerCase() === "y") {
+      process.stdout.write(renderColor(`🔗 Opening PR for branch "${newBranch}"...\n`, COLORS.GREEN));
 
-        await $`gh pr create --base ${branch} --head ${newBranch} --title "${newBranch}" --body "Auto-created PR for ${newBranch}"`;
+      await $`gh pr create --base ${branch} --head ${newBranch} --title "${newBranch}" --body "Auto-created PR for ${newBranch}"`;
 
-        process.stdout.write(
-          renderColor(`✅ PR opened successfully!\n`, [
-            COLORS.BOLD,
-            COLORS.GREEN,
-          ]),
-        );
-      }
+      process.stdout.write(renderColor(`✅ PR opened successfully!\n`, [COLORS.BOLD, COLORS.GREEN]));
+    }
 
-      process.stdout.write(renderColor(`👋 Goodbye!\n`, COLORS.CYAN));
+    process.stdout.write(renderColor(`👋 Goodbye!\n`, COLORS.CYAN));
 
-      showCursor();
-      process.exit(0);
-    },
-  );
+    showCursor();
+    process.exit(0);
+  });
 };
