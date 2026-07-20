@@ -54,9 +54,9 @@ changes on its already-created `for-dev`/`for-stag` children, select **"🔄 Syn
 branches"** from the main menu while standing on the parent branch. The tool will:
 
 1. Detect every existing child branch (`<prefix>/<parent>`) for your configured prefixes
-2. Let you **sync all** of them or pick a single one
+2. Let you **sync all** of them (asking before each push, or auto-pushing all) or pick a single one
 3. Merge the parent into each child (your child-only work is preserved)
-4. Ask whether to `git push` each updated child
+4. Ask whether to `git push` each updated child — skipped automatically if you chose the auto-push mode
 
 If a merge hits a conflict, syncing **stops** on that branch and leaves you there to
 resolve it manually — the remaining children are left untouched.
