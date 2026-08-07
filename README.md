@@ -86,6 +86,17 @@ Each line maps an **origin branch** (left) to a **prefix** (right). When you sel
 npm uninstall -g tree-swing
 ```
 
+## 🚢 Releasing
+
+Publishing is automated. Every push to `main` compares the `version` in `package.json` against the one on npm:
+
+- **Same version** — the workflow exits without publishing.
+- **New version** — the package is published to npm and a matching `v<version>` GitHub release is created.
+
+So releasing means bumping `version` in `package.json` within your PR. Nothing else is required.
+
+Requires an `NPM_TOKEN` secret (npm automation token) configured in the repository settings.
+
 ## 📝 License
 
 MIT

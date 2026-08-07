@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Resolve version
+        id: version
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view tree-swing version 2>/dev/null || echo none)
+          echo "local=$LOCAL" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version $LOCAL already published, skipping."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing $LOCAL (registry has $PUBLISHED)."
+          fi
+
+      - name: Publish to npm
+        if: steps.version.outputs.changed == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        if: steps.version.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.local }}
+        run: gh release create "v$VERSION" --title "v$VERSION" --generate-notes
